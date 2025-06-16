@@ -16,6 +16,8 @@ export type Database = {
           file_size: number
           file_url: string
           id: string
+          is_public: boolean
+          organization_id: string | null
           updated_at: string
           user_id: string
         }
@@ -25,6 +27,8 @@ export type Database = {
           file_size: number
           file_url: string
           id?: string
+          is_public?: boolean
+          organization_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -34,6 +38,8 @@ export type Database = {
           file_size?: number
           file_url?: string
           id?: string
+          is_public?: boolean
+          organization_id?: string | null
           updated_at?: string
           user_id?: string
         }

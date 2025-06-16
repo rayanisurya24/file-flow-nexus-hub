@@ -144,9 +144,9 @@ const DashboardFiles = () => {
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-medium text-gray-900">{file.file_name}</h3>
                         {file.is_public ? (
-                          <Globe className="w-4 h-4 text-green-600" title="Public file" />
+                          <Globe className="w-4 h-4 text-green-600" />
                         ) : (
-                          <Lock className="w-4 h-4 text-gray-600" title="Private file" />
+                          <Lock className="w-4 h-4 text-gray-600" />
                         )}
                       </div>
                       <p className="text-sm text-gray-500">
