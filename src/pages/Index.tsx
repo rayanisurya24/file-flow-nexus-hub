@@ -2,6 +2,7 @@
 import { NavBar } from "@/components/ui/tubelight-navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
+import { AuthButtons } from "@/components/AuthButtons";
 import { FileText, Upload, Share2, Settings } from "lucide-react";
 
 const Index = () => {
@@ -14,6 +15,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      {/* Auth buttons in top right */}
+      <div className="fixed top-6 right-6 z-50">
+        <AuthButtons />
+      </div>
+      
       <NavBar items={navItems} />
       
       <div id="home">
