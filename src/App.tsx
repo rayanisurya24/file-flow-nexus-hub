@@ -10,7 +10,6 @@ import DashboardUpload from "./pages/DashboardUpload";
 import DashboardFiles from "./pages/DashboardFiles";
 import FileShare from "./pages/FileShare";
 import NotFound from "./pages/NotFound";
-import AuthWrapper from "./components/AuthWrapper";
 
 const queryClient = new QueryClient();
 
@@ -21,26 +20,10 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={
-            <AuthWrapper>
-              <Index />
-            </AuthWrapper>
-          } />
-          <Route path="/dashboard" element={
-            <AuthWrapper requireAuth>
-              <Dashboard />
-            </AuthWrapper>
-          } />
-          <Route path="/dashboard/upload" element={
-            <AuthWrapper requireAuth>
-              <DashboardUpload />
-            </AuthWrapper>
-          } />
-          <Route path="/dashboard/my-files" element={
-            <AuthWrapper requireAuth>
-              <DashboardFiles />
-            </AuthWrapper>
-          } />
+          <Route path="/" element={<Index />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/upload" element={<DashboardUpload />} />
+          <Route path="/dashboard/my-files" element={<DashboardFiles />} />
           <Route path="/share/:fileId" element={<FileShare />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
