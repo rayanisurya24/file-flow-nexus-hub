@@ -7,17 +7,9 @@ import { Eye, Download, Share, Trash2, Globe, Lock } from "lucide-react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tables } from "@/integrations/supabase/types";
 
-interface FileRecord {
-  id: string;
-  user_id: string;
-  organization_id: string | null;
-  file_name: string;
-  file_url: string;
-  file_size: number;
-  is_public: boolean;
-  created_at: string;
-}
+type FileRecord = Tables<'files'>;
 
 const DashboardFiles = () => {
   const { user } = useUser();
@@ -159,7 +151,6 @@ const DashboardFiles = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => previewFile(file.file_url)}
-                        title="Preview"
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
@@ -167,7 +158,6 @@ const DashboardFiles = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => window.open(file.file_url, '_blank')}
-                        title="Download"
                       >
                         <Download className="w-4 h-4" />
                       </Button>
@@ -175,7 +165,6 @@ const DashboardFiles = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => copyShareLink(file.id)}
-                        title="Share"
                       >
                         <Share className="w-4 h-4" />
                       </Button>
@@ -186,7 +175,6 @@ const DashboardFiles = () => {
                           fileId: file.id, 
                           isPublic: !file.is_public 
                         })}
-                        title={file.is_public ? "Make private" : "Make public"}
                       >
                         {file.is_public ? <Lock className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
                       </Button>
@@ -195,7 +183,6 @@ const DashboardFiles = () => {
                         size="sm"
                         onClick={() => deleteMutation.mutate(file.id)}
                         disabled={deleteMutation.isPending}
-                        title="Delete"
                       >
                         <Trash2 className="w-4 h-4 text-red-500" />
                       </Button>

@@ -5,17 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, FileText, Calendar, HardDrive } from "lucide-react";
+import { Tables } from "@/integrations/supabase/types";
 
-interface FileRecord {
-  id: string;
-  user_id: string;
-  organization_id: string | null;
-  file_name: string;
-  file_url: string;
-  file_size: number;
-  is_public: boolean;
-  created_at: string;
-}
+type FileRecord = Tables<'files'>;
 
 const FileShare = () => {
   const { fileId } = useParams();
