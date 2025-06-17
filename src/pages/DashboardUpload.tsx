@@ -21,7 +21,7 @@ const DashboardUpload = () => {
       if (!user?.id) throw new Error('User not authenticated');
       
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${organization?.id || user.id}/${Date.now()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('user-files')
@@ -48,7 +48,6 @@ const DashboardUpload = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-files'] });
-      queryClient.invalidateQueries({ queryKey: ['file-stats'] });
       toast.success('File uploaded successfully!');
     },
     onError: (error) => {
@@ -81,9 +80,7 @@ const DashboardUpload = () => {
     if (files.length > 0) {
       setUploading(true);
       try {
-        for (const file of files) {
-          await uploadMutation.mutateAsync(file);
-        }
+        await uploadMutation.mutateAsync(files[0]);
       } finally {
         setUploading(false);
       }

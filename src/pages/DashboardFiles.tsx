@@ -1,15 +1,13 @@
 
 import { useUser, useOrganization } from "@clerk/clerk-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Eye, Download, Share, Trash2, Globe, Lock, Edit } from "lucide-react";
+import { Eye, Download, Share, Trash2, Globe, Lock } from "lucide-react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
-import RenameDialog from "@/components/RenameDialog";
 
 type FileRecord = Tables<'files'>;
 
@@ -17,7 +15,6 @@ const DashboardFiles = () => {
   const { user } = useUser();
   const { organization } = useOrganization();
   const queryClient = useQueryClient();
-  const [renameFile, setRenameFile] = useState<FileRecord | null>(null);
 
   const { data: files = [], isLoading } = useQuery({
     queryKey: ['user-files', user?.id, organization?.id],
@@ -54,29 +51,10 @@ const DashboardFiles = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-files'] });
-      queryClient.invalidateQueries({ queryKey: ['file-stats'] });
       toast.success('File deleted successfully!');
     },
     onError: () => {
       toast.error('Failed to delete file');
-    },
-  });
-
-  const renameMutation = useMutation({
-    mutationFn: async ({ fileId, newName }: { fileId: string; newName: string }) => {
-      const { error } = await supabase
-        .from('files')
-        .update({ file_name: newName })
-        .eq('id', fileId);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-files'] });
-      toast.success('File renamed successfully!');
-    },
-    onError: () => {
-      toast.error('Failed to rename file');
     },
   });
 
@@ -114,12 +92,6 @@ const DashboardFiles = () => {
 
   const previewFile = (fileUrl: string) => {
     window.open(fileUrl, '_blank');
-  };
-
-  const handleRename = (newName: string) => {
-    if (renameFile) {
-      renameMutation.mutate({ fileId: renameFile.id, newName });
-    }
   };
 
   if (isLoading) {
@@ -192,13 +164,6 @@ const DashboardFiles = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setRenameFile(file)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
                         onClick={() => copyShareLink(file.id)}
                       >
                         <Share className="w-4 h-4" />
@@ -228,13 +193,6 @@ const DashboardFiles = () => {
             ))}
           </div>
         )}
-
-        <RenameDialog
-          isOpen={!!renameFile}
-          onClose={() => setRenameFile(null)}
-          onRename={handleRename}
-          currentName={renameFile?.file_name || ''}
-        />
       </div>
     </DashboardLayout>
   );

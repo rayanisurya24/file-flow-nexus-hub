@@ -10,8 +10,6 @@ import DashboardUpload from "./pages/DashboardUpload";
 import DashboardFiles from "./pages/DashboardFiles";
 import FileShare from "./pages/FileShare";
 import NotFound from "./pages/NotFound";
-import AuthPage from "./components/AuthPage";
-import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -23,23 +21,11 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/upload" element={
-            <ProtectedRoute>
-              <DashboardUpload />
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/my-files" element={
-            <ProtectedRoute>
-              <DashboardFiles />
-            </ProtectedRoute>
-          } />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/upload" element={<DashboardUpload />} />
+          <Route path="/dashboard/my-files" element={<DashboardFiles />} />
           <Route path="/share/:fileId" element={<FileShare />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
