@@ -4,8 +4,12 @@ import { HeroSection } from "@/components/HeroSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { AuthButtons } from "@/components/AuthButtons";
 import { FileText, Upload, Share2, Settings } from "lucide-react";
+import { useUser } from "@clerk/clerk-react";
+import AuthPage from "@/components/AuthPage";
 
 const Index = () => {
+  const { user, isLoaded } = useUser();
+
   const navItems = [
     { name: 'Home', url: '#home', icon: FileText },
     { name: 'Upload', url: '#upload', icon: Upload },
@@ -13,33 +17,22 @@ const Index = () => {
     { name: 'Settings', url: '#settings', icon: Settings }
   ];
 
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-gray-600">Loading...</div>
+      </div>
+    );
+  }
+
+  // If user is signed in, they'll be redirected by AuthWrapper in App.tsx
+  if (user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen">
-      {/* Auth buttons in top right */}
-      <div className="fixed top-6 right-6 z-50">
-        <AuthButtons />
-      </div>
-      
-      <NavBar items={navItems} />
-      
-      <div id="home">
-        <HeroSection />
-      </div>
-      
-      <div id="features">
-        <FeaturesSection />
-      </div>
-      
-      {/* Footer */}
-      <footer className="bg-gradient-to-r from-blue-900 to-purple-900 text-white py-12 px-6">
-        <div className="max-w-6xl mx-auto text-center">
-          <h3 className="text-2xl font-bold mb-4">Ready to get started?</h3>
-          <p className="text-lg mb-8 text-blue-100">Join thousands of users who trust us with their files</p>
-          <button className="bg-white text-blue-900 px-8 py-3 rounded-full font-semibold hover:bg-blue-50 transition-colors duration-300">
-            Start Free Trial
-          </button>
-        </div>
-      </footer>
+      <AuthPage />
     </div>
   );
 };

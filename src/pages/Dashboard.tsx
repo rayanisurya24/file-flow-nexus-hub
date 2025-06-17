@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { FileText, Upload, Users, HardDrive } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Dashboard = () => {
   const { user } = useUser();
@@ -102,18 +103,22 @@ const Dashboard = () => {
               <CardTitle className="text-lg font-semibold text-gray-900">Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <Upload className="w-5 h-5 text-blue-600" />
-                  <span className="font-medium text-gray-900">Upload Files</span>
+              <Link to="/dashboard/upload" className="block">
+                <div className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <Upload className="w-5 h-5 text-blue-600" />
+                    <span className="font-medium text-gray-900">Upload Files</span>
+                  </div>
                 </div>
-              </button>
-              <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-5 h-5 text-green-600" />
-                  <span className="font-medium text-gray-900">View All Files</span>
+              </Link>
+              <Link to="/dashboard/my-files" className="block">
+                <div className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-5 h-5 text-green-600" />
+                    <span className="font-medium text-gray-900">View All Files</span>
+                  </div>
                 </div>
-              </button>
+              </Link>
             </CardContent>
           </Card>
         </div>
