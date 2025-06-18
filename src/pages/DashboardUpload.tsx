@@ -21,17 +21,30 @@ const DashboardUpload = () => {
       if (!user?.id) throw new Error('User not authenticated');
       
       const fileExt = file.name.split('.').pop();
-      const fileName = `${organization?.id || user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      console.log('Uploading file:', fileName);
       
       const { error: uploadError } = await supabase.storage
         .from('user-files')
         .upload(fileName, file);
       
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
       
       const { data: { publicUrl } } = supabase.storage
         .from('user-files')
         .getPublicUrl(fileName);
+      
+      console.log('File uploaded, inserting record:', {
+        user_id: user.id,
+        organization_id: organization?.id || null,
+        file_name: file.name,
+        file_url: publicUrl,
+        file_size: file.size
+      });
       
       const { error: dbError } = await supabase
         .from('files')
@@ -44,25 +57,31 @@ const DashboardUpload = () => {
           is_public: false,
         });
       
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error('Database error:', dbError);
+        throw dbError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-files'] });
+      queryClient.invalidateQueries({ queryKey: ['file-stats'] });
       toast.success('File uploaded successfully!');
     },
     onError: (error) => {
       console.error('Upload error:', error);
-      toast.error('Failed to upload file');
+      toast.error('Failed to upload file: ' + error.message);
     },
   });
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
     
     setUploading(true);
     try {
-      await uploadMutation.mutateAsync(file);
+      for (const file of files) {
+        await uploadMutation.mutateAsync(file);
+      }
       // Reset the input
       event.target.value = '';
     } finally {
@@ -80,7 +99,9 @@ const DashboardUpload = () => {
     if (files.length > 0) {
       setUploading(true);
       try {
-        await uploadMutation.mutateAsync(files[0]);
+        for (const file of files) {
+          await uploadMutation.mutateAsync(file);
+        }
       } finally {
         setUploading(false);
       }

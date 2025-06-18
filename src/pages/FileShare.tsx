@@ -24,7 +24,10 @@ const FileShare = () => {
         .eq('is_public', true)
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching file:', error);
+        throw error;
+      }
       return data as FileRecord;
     },
     enabled: !!fileId,

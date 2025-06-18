@@ -1,8 +1,7 @@
-
 import { useUser, OrganizationSwitcher } from "@clerk/clerk-react";
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarHeader, SidebarInset } from "@/components/ui/sidebar";
 import { NavLink, useLocation } from "react-router-dom";
-import { Upload, FileText, Settings, Home } from "lucide-react";
+import { Upload, FileText, Home } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -16,7 +15,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { title: "Overview", url: "/dashboard", icon: Home },
     { title: "Upload Files", url: "/dashboard/upload", icon: Upload },
     { title: "My Files", url: "/dashboard/my-files", icon: FileText },
-    { title: "Settings", url: "/dashboard/settings", icon: Settings },
   ];
 
   if (!isLoaded) {

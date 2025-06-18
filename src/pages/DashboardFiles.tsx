@@ -3,11 +3,13 @@ import { useUser, useOrganization } from "@clerk/clerk-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Eye, Download, Share, Trash2, Globe, Lock } from "lucide-react";
+import { Eye, Download, Share, Trash2, Globe, Lock, Edit } from "lucide-react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
+import { RenameFileDialog } from "@/components/RenameFileDialog";
+import { useState } from "react";
 
 type FileRecord = Tables<'files'>;
 
@@ -15,6 +17,7 @@ const DashboardFiles = () => {
   const { user } = useUser();
   const { organization } = useOrganization();
   const queryClient = useQueryClient();
+  const [renameFile, setRenameFile] = useState<{ id: string; name: string } | null>(null);
 
   const { data: files = [], isLoading } = useQuery({
     queryKey: ['user-files', user?.id, organization?.id],
@@ -34,7 +37,10 @@ const DashboardFiles = () => {
       
       const { data, error } = await query;
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching files:', error);
+        throw error;
+      }
       return data as FileRecord[];
     },
     enabled: !!user?.id,
@@ -51,9 +57,11 @@ const DashboardFiles = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-files'] });
+      queryClient.invalidateQueries({ queryKey: ['file-stats'] });
       toast.success('File deleted successfully!');
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Delete error:', error);
       toast.error('Failed to delete file');
     },
   });
@@ -71,8 +79,29 @@ const DashboardFiles = () => {
       queryClient.invalidateQueries({ queryKey: ['user-files'] });
       toast.success('File privacy updated!');
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Privacy update error:', error);
       toast.error('Failed to update file privacy');
+    },
+  });
+
+  const renameMutation = useMutation({
+    mutationFn: async ({ fileId, newName }: { fileId: string; newName: string }) => {
+      const { error } = await supabase
+        .from('files')
+        .update({ file_name: newName })
+        .eq('id', fileId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-files'] });
+      toast.success('File renamed successfully!');
+      setRenameFile(null);
+    },
+    onError: (error) => {
+      console.error('Rename error:', error);
+      toast.error('Failed to rename file');
     },
   });
 
@@ -92,6 +121,12 @@ const DashboardFiles = () => {
 
   const previewFile = (fileUrl: string) => {
     window.open(fileUrl, '_blank');
+  };
+
+  const handleRename = (newName: string) => {
+    if (renameFile) {
+      renameMutation.mutate({ fileId: renameFile.id, newName });
+    }
   };
 
   if (isLoading) {
@@ -151,6 +186,7 @@ const DashboardFiles = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => previewFile(file.file_url)}
+                        title="Preview"
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
@@ -158,13 +194,23 @@ const DashboardFiles = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => window.open(file.file_url, '_blank')}
+                        title="Download"
                       >
                         <Download className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
+                        onClick={() => setRenameFile({ id: file.id, name: file.file_name })}
+                        title="Rename"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => copyShareLink(file.id)}
+                        title="Share"
                       >
                         <Share className="w-4 h-4" />
                       </Button>
@@ -175,6 +221,7 @@ const DashboardFiles = () => {
                           fileId: file.id, 
                           isPublic: !file.is_public 
                         })}
+                        title={file.is_public ? "Make Private" : "Make Public"}
                       >
                         {file.is_public ? <Lock className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
                       </Button>
@@ -183,6 +230,7 @@ const DashboardFiles = () => {
                         size="sm"
                         onClick={() => deleteMutation.mutate(file.id)}
                         disabled={deleteMutation.isPending}
+                        title="Delete"
                       >
                         <Trash2 className="w-4 h-4 text-red-500" />
                       </Button>
@@ -193,6 +241,14 @@ const DashboardFiles = () => {
             ))}
           </div>
         )}
+
+        <RenameFileDialog
+          isOpen={!!renameFile}
+          onClose={() => setRenameFile(null)}
+          onRename={handleRename}
+          currentName={renameFile?.name || ''}
+          isLoading={renameMutation.isPending}
+        />
       </div>
     </DashboardLayout>
   );
