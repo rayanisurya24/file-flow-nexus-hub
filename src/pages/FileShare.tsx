@@ -1,16 +1,18 @@
 
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@clerk/clerk-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, FileText, Calendar, HardDrive } from "lucide-react";
+import { Download, FileText, Calendar, HardDrive, Lock } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 
 type FileRecord = Tables<'files'>;
 
 const FileShare = () => {
   const { fileId } = useParams();
+  const { user } = useUser();
 
   const { data: file, isLoading, error } = useQuery({
     queryKey: ['shared-file', fileId],
@@ -21,13 +23,18 @@ const FileShare = () => {
         .from('files')
         .select('*')
         .eq('id', fileId)
-        .eq('is_public', true)
         .single();
       
       if (error) {
         console.error('Error fetching file:', error);
         throw error;
       }
+
+      // Check if file is public or if user owns it
+      if (!data.is_public && (!user || data.user_id !== user.id)) {
+        throw new Error('File is private and you do not have access');
+      }
+
       return data as FileRecord;
     },
     enabled: !!fileId,
@@ -59,13 +66,24 @@ const FileShare = () => {
   }
 
   if (error || !file) {
+    const isPrivateFile = error?.message?.includes('private');
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="max-w-md w-full mx-4">
           <CardContent className="text-center py-12">
-            <FileText className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">File Not Found</h2>
-            <p className="text-gray-600">This file doesn't exist or is not publicly accessible.</p>
+            {isPrivateFile ? (
+              <>
+                <Lock className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Private File</h2>
+                <p className="text-gray-600">This file is private. You need to be signed in and have access to view it.</p>
+              </>
+            ) : (
+              <>
+                <FileText className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">File Not Found</h2>
+                <p className="text-gray-600">This file doesn't exist or is not accessible.</p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -89,7 +107,10 @@ const FileShare = () => {
 
         <Card className="bg-white border border-gray-200 mb-8">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-semibold text-gray-900">{file.file_name}</CardTitle>
+            <CardTitle className="text-2xl font-semibold text-gray-900 flex items-center justify-center gap-2">
+              {file.file_name}
+              {!file.is_public && <Lock className="w-5 h-5 text-gray-500" />}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-center mb-8">
@@ -179,6 +200,23 @@ const FileShare = () => {
       </div>
     </div>
   );
+};
+
+const formatFileSize = (bytes: number) => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+const getFileType = (fileName: string) => {
+  const extension = fileName.split('.').pop()?.toLowerCase();
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension || '')) return 'image';
+  if (['pdf'].includes(extension || '')) return 'pdf';
+  if (['mp4', 'avi', 'mov', 'wmv'].includes(extension || '')) return 'video';
+  if (['mp3', 'wav', 'flac', 'aac'].includes(extension || '')) return 'audio';
+  return 'file';
 };
 
 export default FileShare;
