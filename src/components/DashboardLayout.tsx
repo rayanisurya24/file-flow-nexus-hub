@@ -1,7 +1,9 @@
-import { useUser, OrganizationSwitcher } from "@clerk/clerk-react";
+
+import { useUser, OrganizationSwitcher, SignOutButton } from "@clerk/clerk-react";
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarHeader, SidebarInset } from "@/components/ui/sidebar";
 import { NavLink, useLocation } from "react-router-dom";
-import { Upload, FileText, Home } from "lucide-react";
+import { Upload, FileText, Home, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -39,13 +41,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <div className="flex min-h-screen w-full">
           <Sidebar className="border-r border-gray-200">
             <SidebarHeader className="p-6 border-b border-gray-200">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 mb-4">
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">CV</span>
                 </div>
                 <span className="text-xl font-semibold text-gray-900">CloudVault</span>
               </div>
-              <div className="mt-4">
+              
+              <div className="mb-4">
                 <OrganizationSwitcher 
                   appearance={{
                     elements: {
@@ -55,6 +58,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   }}
                 />
               </div>
+
+              <SignOutButton>
+                <Button variant="outline" size="sm" className="w-full justify-start text-gray-600 hover:text-red-600 hover:border-red-200">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </SignOutButton>
             </SidebarHeader>
             
             <SidebarContent>

@@ -2,8 +2,19 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Upload, Share2 } from "lucide-react";
+import { useUser, SignInButton } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 
 export function HeroSection() {
+  const { isSignedIn } = useUser();
+  const navigate = useNavigate();
+
+  const handleStartUploading = () => {
+    if (isSignedIn) {
+      navigate("/dashboard/upload");
+    }
+  };
+
   return (
     <section className="min-h-screen flex flex-col items-center justify-center px-6 py-20 bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <motion.div
@@ -37,10 +48,24 @@ export function HeroSection() {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
-          <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
-            <Upload className="mr-2 h-5 w-5" />
-            Start Uploading
-          </Button>
+          {isSignedIn ? (
+            <Button 
+              size="lg" 
+              onClick={handleStartUploading}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Upload className="mr-2 h-5 w-5" />
+              Start Uploading
+            </Button>
+          ) : (
+            <SignInButton fallbackRedirectUrl="/dashboard/upload">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
+                <Upload className="mr-2 h-5 w-5" />
+                Start Uploading
+              </Button>
+            </SignInButton>
+          )}
+          
           <Button 
             variant="outline" 
             size="lg" 

@@ -1,26 +1,25 @@
 
-import { NavBar } from "@/components/ui/tubelight-navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { AuthButtons } from "@/components/AuthButtons";
-import { FileText, Upload, Share2, Settings } from "lucide-react";
 
 const Index = () => {
-  const navItems = [
-    { name: 'Home', url: '#home', icon: FileText },
-    { name: 'Upload', url: '#upload', icon: Upload },
-    { name: 'Share', url: '#share', icon: Share2 },
-    { name: 'Settings', url: '#settings', icon: Settings }
-  ];
-
   return (
     <div className="min-h-screen">
+      {/* CloudVault Logo in top left */}
+      <div className="fixed top-6 left-6 z-50">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">CV</span>
+          </div>
+          <span className="text-xl font-semibold text-gray-900">CloudVault</span>
+        </div>
+      </div>
+
       {/* Auth buttons in top right */}
       <div className="fixed top-6 right-6 z-50">
         <AuthButtons />
       </div>
-      
-      <NavBar items={navItems} />
       
       <div id="home">
         <HeroSection />
