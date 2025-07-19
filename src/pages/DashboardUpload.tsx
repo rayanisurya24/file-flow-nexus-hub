@@ -18,49 +18,66 @@ const DashboardUpload = () => {
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
-      if (!user?.id) throw new Error('User not authenticated');
+      console.log('Starting upload for file:', file.name, 'Size:', file.size);
+      
+      if (!user?.id) {
+        console.error('User not authenticated');
+        throw new Error('User not authenticated');
+      }
+      
+      console.log('User authenticated:', user.id);
+      
+      // Check file size (50MB limit)
+      const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+      if (file.size > maxSize) {
+        throw new Error('File size exceeds 50MB limit');
+      }
       
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       
-      console.log('Uploading file:', fileName);
+      console.log('Uploading file to storage:', fileName);
       
-      const { error: uploadError } = await supabase.storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('user-files')
         .upload(fileName, file);
       
       if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw uploadError;
+        console.error('Storage upload error:', uploadError);
+        throw new Error(`Storage upload failed: ${uploadError.message}`);
       }
+      
+      console.log('File uploaded to storage successfully:', uploadData);
       
       const { data: { publicUrl } } = supabase.storage
         .from('user-files')
         .getPublicUrl(fileName);
       
-      console.log('File uploaded, inserting record:', {
+      console.log('Generated public URL:', publicUrl);
+      
+      const dbRecord = {
         user_id: user.id,
         organization_id: organization?.id || null,
         file_name: file.name,
         file_url: publicUrl,
-        file_size: file.size
-      });
+        file_size: file.size,
+        is_public: false,
+      };
       
-      const { error: dbError } = await supabase
+      console.log('Inserting database record:', dbRecord);
+      
+      const { data: dbData, error: dbError } = await supabase
         .from('files')
-        .insert({
-          user_id: user.id,
-          organization_id: organization?.id || null,
-          file_name: file.name,
-          file_url: publicUrl,
-          file_size: file.size,
-          is_public: false,
-        });
+        .insert(dbRecord)
+        .select();
       
       if (dbError) {
-        console.error('Database error:', dbError);
-        throw dbError;
+        console.error('Database insert error:', dbError);
+        throw new Error(`Database insert failed: ${dbError.message}`);
       }
+      
+      console.log('Database record created successfully:', dbData);
+      return dbData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-files'] });
